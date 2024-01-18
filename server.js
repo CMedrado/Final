@@ -48,7 +48,7 @@ const contractABI = [
     "type": "function"
   }
 ]
-const contractAddress = '0x0443b6EE01aCc45AF13C483AF3d272c197B7e89d'; // Coloque o endereço do seu contrato aqui
+const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Coloque o endereço do seu contrato aqui
 
 // Crie uma instância do contrato
 console.log('Criando instância do contrato.');
@@ -66,18 +66,15 @@ app.get('/check-news/:newsId', async (req, res) => {
 
   try {
     console.log(`Buscando informações para o ID da notícia: ${newsId}`);
-    console.log(`Buscando informações para o ID da notícia: ${newsId}`);
     const result = await contract.methods.getNewsItem(newsId).call();
     
-    // Decodificar manualmente os valores retornados
-    const newsItem = {
-        sender: result[0],
-        news: result[1],
-        isFake: result[2]
+    // result é true ou false
+    console.log('Informações da notícia recebidas:', result);
+    const item = {
+        validity: result,
     };
 
-    console.log('Informações da notícia recebidas:', newsItem);
-    res.json({ newsItem });
+    res.json({ item });
   } catch (error) {
       console.error('Erro ao acessar o contrato:', error);
       console.error('Detalhes do erro:', error.reason, error.receipt);

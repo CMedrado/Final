@@ -1,16 +1,10 @@
 #! /bin/bash
 
-echo "Starting QBFT Besu local network"
+echo "Starting IBFT Besu local network"
 
 # Check if besu binary is installed
 if ! [ -x "$(command -v besu)" ]; then
   echo "Error: besu is not installed. Go to https://besu.hyperledger.org/private-networks/get-started/install/binary-distribution" >&2
-  exit 1
-fi
-
-# Check if truffle is installed
-if ! [ -x "$(command -v hardhat)" ]; then
-  echo "Error: truffle is not installed. Run: npm install -g hardhat" >&2
   exit 1
 fi
 
@@ -20,35 +14,35 @@ echo "Cleaning up previous data"
 docker rm -f besu-node-0 besu-node-1 besu-node-2 besu-node-3 
 
 # Clean up data dir from each node
-rm -rf node/besu-0/data
-rm -rf node/besu-1/data
-rm -rf node/besu-2/data
-rm -rf node/besu-3/data
+rm -rf IBFT-Network/Node-1/data
+rm -rf IBFT-Network/Node-2/data
+rm -rf IBFT-Network/Node-3/data
+rm -rf IBFT-Network/Node-4/data
 
 rm -rf genesis
 
 rm -rf _tmp
 
 # Recreate data dir for each node
-mkdir -p node/besu-0/data
-mkdir -p node/besu-1/data
-mkdir -p node/besu-2/data
-mkdir -p node/besu-3/data
+mkdir -p IBFT-Network/Node-1/data
+mkdir -p IBFT-Network/Node-2/data
+mkdir -p IBFT-Network/Node-3/data
+mkdir -p IBFT-Network/Node-4/data
 
 # generate keys and genesis
 mkdir _tmp && cd _tmp
-besu operator generate-blockchain-config --config-file=../config/qbftConfigFile.json --to=networkFiles --private-key-file-name=key
+besu operator generate-blockchain-config --config-file=../IBFT-Network/ibftConfigFile.json --to=networkFiles --private-key-file-name=key
 
 cd ..   
 
-counter=0  # Initialize the counter
+counter=1  # Initialize the counter
 # Copy keys to each node
 for folder in _tmp/networkFiles/keys/*; do
   # get the folder name
   folderName=$(basename "$folder")
   # copy the key to each node
-  cp _tmp/networkFiles/keys/$folderName/key node/besu-$counter/data/key
-  cp _tmp/networkFiles/keys/$folderName/key.pub node/besu-$counter/data/key,pub
+  cp _tmp/networkFiles/keys/$folderName/key IBFT-Network/Node-$counter/data/key
+  cp _tmp/networkFiles/keys/$folderName/key.pub IBFT-Network/Node-$counter/data/key,pub
   ((counter++))
 done
 
@@ -107,16 +101,3 @@ docker-compose -f docker/docker-compose-nodes.yaml up -d
 echo "============================="
 echo "Network started successfully!"
 echo "============================="
-
-
-echo ""
-echo ""
-echo "Running npm install..."
-cd contracts
-npm install
-npm install @openzeppelin/contracts
-sleep 5
-
-echo "Deploying contract..."
-
-truffle migrate --f 1 --to 1 --network development
